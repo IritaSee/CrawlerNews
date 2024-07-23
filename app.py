@@ -32,7 +32,7 @@ def run_crawler_general():
     result = crawlerGeneral()
     try:
         # Mengosongkan tabel sebelum menambahkan data baru
-        db.session.query(News).delete()
+        db.session.query(News).filter(News.topik == 'general').delete()
         db.session.commit()
         
         # Menambahkan data hasil crawler ke tabel
@@ -60,7 +60,7 @@ def run_crawler_topik():
     result = crawlerWithTopik(topik)
     try:
         # Mengosongkan tabel sebelum menambahkan data baru
-        db.session.query(News).delete()
+        db.session.query(News).filter(News.topik == topik).delete()
         db.session.commit()
         
         # Menambahkan data hasil crawler ke tabel
