@@ -105,7 +105,7 @@ def crawlerGeneral():
         except requests.HTTPError as e:
             print(f"Failed to scrape {website['name']}: {e}")
 
-    with open('scraped_news.json', 'w', encoding='utf-8') as f:
+    with open('scraped_news_general.json', 'w', encoding='utf-8') as f:
         json.dump(all_news, f, ensure_ascii=False, indent=4)
 
     print(f"Total articles collected: {len(all_news)}")

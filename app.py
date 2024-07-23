@@ -20,6 +20,8 @@ class News(db.Model):
     date = db.Column(db.DateTime, default=db.func.current_timestamp())
     is_fake = db.Column(db.Integer, default=0)
     media_bias = db.Column(db.String(30), nullable=False)
+    topik = db.Column(db.String(30), nullable=False)
+
 
 # Buat database dan tabel
 with app.app_context():
@@ -28,14 +30,56 @@ with app.app_context():
 @app.route('/api/crawler/general', methods=['GET'])
 def run_crawler_general():
     result = crawlerGeneral()
-    return jsonify(result), 200
-
+    try:
+        # Mengosongkan tabel sebelum menambahkan data baru
+        db.session.query(News).delete()
+        db.session.commit()
+        
+        # Menambahkan data hasil crawler ke tabel
+        for item in result:
+            news = News(
+                title=item['title'],
+                link=item['link'],
+                image=item['image'],
+                content=item['content'],
+                is_fake=item.get('is_fake', 0),
+                media_bias=item['media_bias'],
+                topik = 'general'
+            )
+            db.session.add(news)
+        db.session.commit()
+        return jsonify({'message': 'News updated successfully from general crawler'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+    
 @app.route('/api/crawler/topik', methods=['POST'])
 def run_crawler_topik():
     data = request.get_json()
     topik = data.get('topik')
     result = crawlerWithTopik(topik)
-    return jsonify(result), 200
+    try:
+        # Mengosongkan tabel sebelum menambahkan data baru
+        db.session.query(News).delete()
+        db.session.commit()
+        
+        # Menambahkan data hasil crawler ke tabel
+        for item in result:
+            news = News(
+                title=item['title'],
+                link=item['link'],
+                image=item['image'],
+                content=item['content'],
+                is_fake=item.get('is_fake', 0),
+                media_bias=item['media_bias'],
+                topik = topik
+            )
+            db.session.add(news)
+        db.session.commit()
+        return jsonify({'message': 'News updated successfully from topic crawler'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
@@ -54,18 +98,24 @@ def get_news():
 @app.route('/api/news', methods=['POST'])
 def add_news():
     data = request.get_json()
-    for item in data:
-        news = News(
-            title=item['title'],
-            link=item['link'],
-            image=item['image'],
-            content=item['content'],
-            is_fake=item.get('is_fake', 0),
-            media_bias=item['media_bias']
-        )
-        db.session.add(news)
-    db.session.commit()
-    return jsonify({'message': 'News added successfully'}), 201
+    try: 
+        db.session.query(News).delete()
+        db.session.commit()
+        for item in data:
+            news = News(
+                title=item['title'],
+                link=item['link'],
+                image=item['image'],
+                content=item['content'],
+                is_fake=item.get('is_fake', 0),
+                media_bias=item['media_bias']
+            )
+            db.session.add(news)
+        db.session.commit()
+        return jsonify({'message': 'News added successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
