@@ -1,0 +1,7 @@
+pytrends
+Flask
+Flask-SQLAlchemy
+requests
+beautifulsoup4
+pandas
+selenium

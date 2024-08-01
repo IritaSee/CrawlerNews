@@ -26,11 +26,22 @@ def parse_article(link, website):
     try:
         soup = get_soup(link)
         content_div = soup.find(class_=website['content_class'])
-        content = ' '.join(p.get_text(strip=True) for p in content_div.find_all('p')) if content_div else 'No content found'
+        if content_div:
+            if website['name'] == 'Antara':
+                my4_divs = content_div.find_all('div', class_='my-4')
+                if my4_divs:
+                    content = ' '.join(div.get_text(strip=True) for div in my4_divs)
+                else:
+                    content = ' '.join(p.get_text(strip=True) for p in content_div.find_all('p'))
+            else:
+                content = ' '.join(p.get_text(strip=True) for p in content_div.find_all('p'))
+        else:
+            content = 'No content found'
         return content
     except Exception as e:
         print(f"Error parsing article {link}: {e}")
         return 'No content found'
+
 
 def parse_page(url, website):
     news_data = []

@@ -23,6 +23,8 @@ def parse_article(link, website):
         soup = get_soup(link)
         content_div = soup.find(class_=website['content_class'])
         content = ' '.join(p.get_text(strip=True) for p in content_div.find_all('p')) if content_div else 'No content found'
+        if(website['name'] == "Antara"):
+            content = content_div.get_text(strip=True)
         return content
     except Exception as e:
         print(f"Error parsing article {link}: {e}")
@@ -45,27 +47,34 @@ def parse_page(url, website):
         link_tag = article.find('a')
         link = link_tag['href'] if link_tag else 'No link found'
 
+        # Check if the link is valid
+        if not link.startswith('http'):
+            link = 'No link found'
+
         date_tag = article.find(class_=website['date_class'])
         date = date_tag.get_text(strip=True) if date_tag else 'No date found'
 
         image_tag = article.find('img')
-        if(website['name'] == "Antara"):
+        print(image_tag)
+        if website['name'] == "Antara" or website['name'] == 'Suara':
             image = image_tag['data-src'] if image_tag else 'No image found'
         else:
             image = image_tag['src'] if image_tag else 'No image found'
 
         content = parse_article(link, website) if link != 'No link found' else 'No content found'
-
-        news_data.append({
-            'title': title,
-            'link': link,
-            "image" : image,
-            'date': date,
-            'content': content,
-            'is_fake': 0,
-            'media_bias': website['platform']
-        })
-        print(f"Appended article: {title}")
+        
+        if((link == "No link found") and (content == "No content found")):
+            continue
+        else:
+            news_data.append({
+                'title': title,
+                'link': link,
+                "image": image,
+                'date': date,
+                'content': content,
+                'is_fake': 0,
+                'media_bias': website['platform']
+            })
 
     return news_data
 

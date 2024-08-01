@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from CrawlerGeneral import crawlerGeneral
 from CrawlerTopik import crawlerWithTopik
+from APITrends import getTrending
 
 app = Flask(__name__)
 
@@ -26,6 +27,11 @@ class News(db.Model):
 # Buat database dan tabel
 with app.app_context():
     db.create_all()
+
+@app.route('/')
+def index():
+    trending_topics = getTrending()
+    return render_template('contohTrend.html', trending_topics=trending_topics)
 
 @app.route('/api/crawler/general', methods=['GET'])
 def run_crawler_general():
@@ -83,7 +89,7 @@ def run_crawler_topik():
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
-    news = News.query.all()
+    news = News.query.filter_by(topik='general').all()
     return jsonify([{
         'id': n.id,
         'title': n.title,
