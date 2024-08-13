@@ -71,16 +71,21 @@ def parse_page(url, website):
                 image_tag = article.find('img')
                 image = image_tag['src'] if image_tag else 'No image found'
                 content = parse_article(link, website) if link != 'No link found' else 'No content found'
+                if not content:
+                    content = "No content found"
 
-                news_data.append({
-                    'title': title,
-                    'content': content,
-                    'date': date,
-                    'link': link,
-                    'image': image,
-                    'is_fake': 0,
-                    'media_bias': 'CNN Indonesia'
-                })
+                if((link == "#") and (content == "No content found")):
+                    continue
+                else:
+                    news_data.append({
+                        'title': title,
+                        'content': content,
+                        'date': date,
+                        'link': link,
+                        'image': image,
+                        'is_fake': 0,
+                        'media_bias': website['platform']
+                    })
         
         finally:
             driver.quit()
@@ -113,16 +118,21 @@ def parse_page(url, website):
                 image = image_tag['src'] if image_tag else 'No image found'
 
             content = parse_article(link, website) if link != 'No link found' else 'No content found'
+            if not content:
+                content = "No content found"
 
-            news_data.append({
-                'title': title,
-                'link': link,
-                'date': date,
-                'content': content,
-                'image': image,
-                'is_fake': 0,
-                'media_bias': website['platform']
-            })
+            if(((link == "No link found") and (content == "No content found")) or (content == "No content found")):
+                continue
+            else:
+                news_data.append({
+                    'title': title,
+                    'content': content,
+                    'date': date,
+                    'link': link,
+                    'image': image,
+                    'is_fake': 0,
+                    'media_bias': website['platform']
+                })
             print(f"Appended article: {title}")
 
     return news_data

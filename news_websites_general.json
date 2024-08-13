@@ -54,17 +54,6 @@
             "content_class": "wrap__article-detail-content",
             "platform": "Antara",
             "next_page": ""
-        },
-        {
-            "name": "Tribunnews",
-            "url": "https://www.tribunnews.com/nasional/politik",
-            "article_tag": "div",
-            "article_class": "mr140",
-            "title_class": "f20 ln24 fbo txt-oev-2",
-            "date_class": "grey pt5",
-            "content_class": "side-article txt-article multi-fontsize",
-            "platform": "tribun",
-            "next_page": ""
         }
     ]
 }

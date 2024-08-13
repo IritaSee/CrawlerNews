@@ -2,7 +2,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
-import pandas as pd
+from crawler_tribun import crawl_tribun
 import time
 
 headers = {
@@ -56,15 +56,14 @@ def parse_page(url, website):
 
         image_tag = article.find('img')
         print(image_tag)
-        if website['name'] == "Antara" or website['name'] == 'Suara':
+        if website['name'] == "Antara":
             image = image_tag['data-src'] if image_tag else 'No image found'
         else:
             image = image_tag['src'] if image_tag else 'No image found'
 
         content = parse_article(link, website) if link != 'No link found' else 'No content found'
-        
-        if((link == "No link found") and (content == "No content found")):
-            continue
+        if not content:
+            content = "No content found"
         else:
             news_data.append({
                 'title': title,
@@ -104,6 +103,8 @@ def get_all_articles(base_url, website, max_pages=1):
 
 def crawlerGeneral():
     all_news = []
+    tribun_data = crawl_tribun()
+    all_news.extend(tribun_data)
     for website in websites:
         try:
             base_url = website['url']
