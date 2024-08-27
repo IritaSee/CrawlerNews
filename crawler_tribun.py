@@ -67,10 +67,11 @@ def save_to_json(data, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-def main():
+def crawl_tribun():
     url = "https://www.tribunnews.com/nasional/politik"
     article_data = scrape_tribun_news(url)
     save_to_json(article_data, 'bias_tribun.json')
+    return article_data
 
 if __name__ == "__main__":
-    main()
+    crawl_tribun()
