@@ -11,7 +11,7 @@ def scrape_tribun_news(url):
     driver.get(url)
 
     try:
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 5).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, 'animate-pulse'))
         )
         
@@ -70,7 +70,7 @@ def save_to_json(data, filename):
 def crawl_tribun():
     url = "https://www.tribunnews.com/nasional/politik"
     article_data = scrape_tribun_news(url)
-    save_to_json(article_data, 'bias_tribun.json')
+    print(article_data)
     return article_data
 
 if __name__ == "__main__":

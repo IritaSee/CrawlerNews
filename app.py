@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from CrawlerGeneral import crawlerGeneral
 from CrawlerTopik import crawlerWithTopik
 from APITrends import getTrending
+import json
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -30,12 +32,17 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    trending_topics = getTrending()
-    return render_template('contohTrend.html', trending_topics=trending_topics)
+    return render_template('index.html')
 
 @app.route('/api/crawler/general', methods=['GET'])
 def run_crawler_general():
     result = crawlerGeneral()
+    date_str = datetime.now().strftime('%d%m%y')
+    filename = f'scraped_news_general_{date_str}.json'
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=4)
+
     try:
         # Mengosongkan tabel sebelum menambahkan data baru
         db.session.query(News).filter(News.topik == 'general').delete()
@@ -64,6 +71,14 @@ def run_crawler_topik():
     data = request.get_json()
     topik = data.get('topik')
     result = crawlerWithTopik(topik)
+    date_str = datetime.now().strftime('%d%m%y')
+    if topik:
+        topik = topik.replace(" ","-").replace("/","-")
+    filename = f'scraped_news_{topik}_{date_str}.json'
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=4)
+
     try:
         # Mengosongkan tabel sebelum menambahkan data baru
         db.session.query(News).filter(News.topik == topik).delete()
@@ -122,6 +137,11 @@ def add_news():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/trending-topics', methods=['GET'])
+def trending_topics():
+    trending_searches = getTrending()
+    return jsonify([{'title': topic} for topic in trending_searches])
 
 if __name__ == '__main__':
     app.run(debug=True)

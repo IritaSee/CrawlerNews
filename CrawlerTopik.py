@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -49,7 +50,8 @@ def parse_page(url, website):
     if website['name'] == 'CNN Indonesia':
         driver = webdriver.Chrome()
         driver.get(url)
-        
+        print(url)
+
         try:
             WebDriverWait(driver, 20).until(
                 EC.invisibility_of_element_located((By.CLASS_NAME, 'animate-pulse'))
@@ -61,12 +63,15 @@ def parse_page(url, website):
             articles = soup.find_all('article')
             
             for article in articles:
-                title = article.find('h2').get_text(strip=True) if article.find('h2') else 'No Title'
+                title = article.find('h2').get_text(strip=True) if article.find('h2') else 'No Title found'
                 date_tag = article.find('span', class_='text-xs text-cnn_black_light3')
                 date = date_tag.get_text(strip=True) if date_tag else 'No date found'
 
                 link_tag = article.find('a')
                 link = link_tag['href'] if link_tag else 'No link found'
+
+                if link and not link.startswith(('http://', 'https://')):
+                    link = urljoin(url, link)
 
                 image_tag = article.find('img')
                 image = image_tag['src'] if image_tag else 'No image found'
@@ -74,18 +79,19 @@ def parse_page(url, website):
                 if not content:
                     content = "No content found"
 
-                if((link == "#") and (content == "No content found")):
+                if title == 'No Title found' and image == 'No image found' and content == 'No content found':
+                    print(f"Skipping article with title '{title}' due to missing data.")
                     continue
-                else:
-                    news_data.append({
-                        'title': title,
-                        'content': content,
-                        'date': date,
-                        'link': link,
-                        'image': image,
-                        'is_fake': 0,
-                        'media_bias': website['platform']
-                    })
+
+                news_data.append({
+                    'title': title,
+                    'link': link,
+                    "image": image,
+                    'date': date,
+                    'content': content,
+                    'is_fake': 0,
+                    'media_bias': website['platform']
+                })
         
         finally:
             driver.quit()
@@ -121,18 +127,19 @@ def parse_page(url, website):
             if not content:
                 content = "No content found"
 
-            if(((link == "No link found") and (content == "No content found")) or (content == "No content found")):
+            if link == 'No link found' and image == 'No image found' and content == 'No content found':
+                print(f"Skipping article with title '{title}' due to missing data.")
                 continue
-            else:
-                news_data.append({
-                    'title': title,
-                    'content': content,
-                    'date': date,
-                    'link': link,
-                    'image': image,
-                    'is_fake': 0,
-                    'media_bias': website['platform']
-                })
+
+            news_data.append({
+                'title': title,
+                'link': link,
+                "image": image,
+                'date': date,
+                'content': content,
+                'is_fake': 0,
+                'media_bias': website['platform']
+            })
             print(f"Appended article: {title}")
 
     return news_data
@@ -156,19 +163,18 @@ def get_all_articles(base_url, website, max_pages=2):
     return articles
 
 def crawlerWithTopik(topik):
+    topik = topik.replace(" ", "+")
     all_news = []
     for website in websites:
         try:
             base_url = website['url'] + topik
+            print(f"Base URL: {base_url}")
             scraped_news = get_all_articles(base_url, website)
             print(f"Scraped {len(scraped_news)} articles from {website['name']}")
             all_news.extend(scraped_news)
             time.sleep(2)
         except requests.HTTPError as e:
             print(f"Failed to scrape {website['name']}: {e}")
-
-    with open('scraped_news_topik.json', 'w', encoding='utf-8') as f:
-        json.dump(all_news, f, ensure_ascii=False, indent=4)
 
     print(f"Total articles collected: {len(all_news)}")
     return all_news
