@@ -161,7 +161,7 @@
                 displayNews(filteredNews);
             });
 
-            fetch('http://127.0.0.1:5000/api/trending-topics')
+            fetch('http://103.56.148.29:5000/api/trending-topics')
                 .then(response => response.json())
                 .then(trendingTopics => {
                     const trendingTopicsList = document.getElementById('trending-topics');
