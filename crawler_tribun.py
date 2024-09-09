@@ -11,7 +11,7 @@ def scrape_tribun_news(url):
     driver.get(url)
 
     try:
-        WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 10).until(
             EC.invisibility_of_element_located((By.CLASS_NAME, 'animate-pulse'))
         )
         
@@ -22,7 +22,8 @@ def scrape_tribun_news(url):
         news_data = []
 
         for article in articles:
-            title = article.find('h3').get_text(strip=True) if article.find('h4') else 'No Title'
+            title_tag = article.find('h1') or article.find('h2') or article.find('h3') or article.find('h4')
+            title = title_tag.get_text(strip=True) if title_tag else 'No Title'
             date_tag = article.find('time')
             date = date_tag.get_text(strip=True) if date_tag else 'No date found'
 
@@ -70,6 +71,7 @@ def save_to_json(data, filename):
 def crawl_tribun():
     url = "https://www.tribunnews.com/nasional/politik"
     article_data = scrape_tribun_news(url)
+    save_to_json(article_data, 'tribun_news.json')
     print(article_data)
     return article_data
 

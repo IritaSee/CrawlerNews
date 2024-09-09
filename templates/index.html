@@ -137,7 +137,7 @@
             }
 
             // Fetching data from API
-            fetch('http://103.56.148.29:5000/api/news')
+            fetch('http://08e1-202-31-143-98.ngrok-free.app/api/news')
                 .then(response => {
                     console.log("Response received:", response);
                     return response.json();
@@ -161,22 +161,24 @@
                 displayNews(filteredNews);
             });
 
-            fetch('http://103.56.148.29:5000/api/trending-topics')
+            fetch('http://08e1-202-31-143-98.ngrok-free.app/api/trending-topics')
                 .then(response => response.json())
                 .then(trendingTopics => {
                     const trendingTopicsList = document.getElementById('trending-topics');
-                    trendingTopicsList.innerHTML = '';
+                    trendingTopicsList.innerHTML = '';  // Clear any previous list items
 
                     trendingTopics.forEach(topic => {
                         const topicElement = document.createElement('li');
 
-                        // Membuat tombol untuk setiap topik
+                        // Create a button for each trending topic
                         const button = document.createElement('button');
                         button.innerText = topic.title;
-                        button.onclick = () => runCrawler(topic.title);
+                        button.onclick = () => runCrawler(topic.title);  // Set the click event to run the crawler
 
-                        // Menambahkan tombol ke elemen <li>
+                        // Append the button to the <li> element
                         topicElement.appendChild(button);
+
+                        // Append the <li> to the trending topics list
                         trendingTopicsList.appendChild(topicElement);
                     });
                 })
